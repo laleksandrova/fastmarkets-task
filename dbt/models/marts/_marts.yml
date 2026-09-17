@@ -17,8 +17,11 @@ models:
           - unique
           - not_null
 
-  - name: order
-    description: "Order header table - one row per order."
+  - name: orders
+    description: >
+      Order header table - one row per order. Named "orders" (plural)
+      rather than "order" - ORDER is a reserved SQL keyword in Snowflake
+      and breaks table creation if used as a bare identifier.
     columns:
       - name: order_id
         tests:
@@ -45,7 +48,7 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('order')
+              to: ref('orders')
               field: order_id
       - name: product_id
         tests:

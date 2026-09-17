@@ -23,7 +23,7 @@ with weekly_product as (
         sum(oi.quantity) as total_quantity,
         sum(oi.line_total) as total_revenue
     from {{ ref('order_item') }} oi
-    inner join {{ ref('order') }} o on oi.order_id = o.order_id
+    inner join {{ ref('orders') }} o on oi.order_id = o.order_id
     group by 1, 2
 )
 

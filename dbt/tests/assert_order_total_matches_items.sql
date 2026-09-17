@@ -11,7 +11,7 @@ select
     o.order_id,
     o.order_total,
     sum(oi.line_total) as computed_total
-from {{ ref('order') }} o
+from {{ ref('orders') }} o
 join {{ ref('order_item') }} oi on o.order_id = oi.order_id
 group by o.order_id, o.order_total
 having abs(o.order_total - sum(oi.line_total)) > 0.01
