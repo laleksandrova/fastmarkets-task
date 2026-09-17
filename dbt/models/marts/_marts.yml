@@ -1,0 +1,78 @@
+version: 2
+
+models:
+  - name: customer
+    description: "Customer dimension table."
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+
+  - name: product
+    description: "Product dimension table. Static in this dataset (3 products)."
+    columns:
+      - name: product_id
+        tests:
+          - unique
+          - not_null
+
+  - name: order
+    description: "Order header table - one row per order."
+    columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('customer')
+              field: customer_id
+
+  - name: order_item
+    description: >
+      Fact table, grain = one row per product per order, built by
+      flattening order_items in staging.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - order_id
+            - product_id
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('order')
+              field: order_id
+      - name: product_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('product')
+              field: product_id
+      - name: line_total
+        description: "quantity * price, computed in staging."
+
+  - name: weekly_top_seller
+    description: >
+      Aggregation view: total quantity and revenue per product per week
+      (week = Monday-start, via DATE_TRUNC('week', ...)). is_top_seller
+      is 1 for the product with the highest total_revenue that week, 0
+      otherwise. "Top seller" is defined by revenue rather than units
+      sold - see README for the reasoning (quantity-based ranking ties
+      in 7 of 144 weeks; revenue-based never ties).
+    columns:
+      - name: week_start
+        tests:
+          - not_null
+      - name: product_id
+        tests:
+          - not_null
+      - name: is_top_seller
+        description: "1 if this product had the highest total_revenue for its week, else 0."
+        tests:
+          - accepted_values:
+              values: [0, 1]

@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: raw
+    database: SALES_DB
+    schema: RAW
+    tables:
+      - name: raw_orders
+        description: >
+          Raw landing table for the homework OBT CSV, loaded as-is by
+          load_to_snowflake.py. No cleaning applied here - every column
+          lands as VARCHAR except order_items, which is parsed into
+          VARIANT on load. Staging models do all the cleaning/casting.

@@ -1,0 +1,52 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: >
+      One row per customer, cleaned from the raw OBT. Phone numbers have
+      embedded literal quote characters stripped; known placeholder
+      values (blank, "123456", "N/A") are nulled rather than kept as
+      fake data. Emails are lowercased, with placeholders ("n/a",
+      "invalid-email", blank) nulled.
+    columns:
+      - name: customer_id
+        description: "Natural key - unique per customer in this dataset."
+        tests:
+          - unique
+          - not_null
+
+  - name: stg_orders
+    description: "One row per order, cast to proper types from the raw OBT."
+    columns:
+      - name: order_id
+        description: "Natural key - unique per order."
+        tests:
+          - unique
+          - not_null
+      - name: customer_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_customers')
+              field: customer_id
+
+  - name: stg_order_items
+    description: >
+      One row per product per order, produced by flattening the
+      order_items JSON array. Grain: (order_id, product_id).
+    columns:
+      - name: order_id
+        tests:
+          - not_null
+      - name: product_id
+        tests:
+          - not_null
+
+  - name: stg_products
+    description: "Distinct product_id/product_name pairs extracted from order_items."
+    columns:
+      - name: product_id
+        description: "Natural key - unique per product."
+        tests:
+          - unique
+          - not_null
