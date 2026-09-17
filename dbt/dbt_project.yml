@@ -21,8 +21,12 @@ models:
       # the right default so it always reflects the current raw data.
       +materialized: view
       +schema: staging
+      +grants:
+        select: ['REVIEWER_ROLE']
     marts:
       # Task explicitly says "create at least three tables" for the
       # Customer/Order/OrderItem/Product layer.
       +materialized: table
       +schema: marts
+      +grants:
+        select: ['REVIEWER_ROLE']
